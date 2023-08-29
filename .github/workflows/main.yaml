@@ -12,7 +12,11 @@ jobs:
         with:
           python-version: '3.8' 
           cache: 'pipenv'
-          
+
+      - name: Install pipenv
+        run: |
+          python -m pip install --upgrade pipenv wheel
+
       - name: Lint
         run: pipenv run pylint scraper cli deployer
       
