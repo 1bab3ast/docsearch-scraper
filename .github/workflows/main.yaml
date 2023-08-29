@@ -17,13 +17,13 @@ jobs:
         run: pip install pipenv
 
       - name: Install dependencies
-        run: pipenv install --dev
+        run: pipenv install --python `which python3` --dev
 
       - name: Lint
-        run: pipenv run pylint scraper cli deployer
+        run: pipenv run --python `which python3` pylint scraper cli deployer
       
       - name: Test
-        run: pipenv run ./docsearch test no_browser
+        run: pipenv run --python `which python3` ./docsearch test no_browser
 
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
