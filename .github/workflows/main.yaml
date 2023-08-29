@@ -1,10 +1,10 @@
-name: Build
+name: Index Search
 on:
   push:
 
 jobs:
   build:
-    name: Build
+    name: Index Search
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,33 +19,40 @@ jobs:
       - name: Install dependencies
         run: pipenv install --python `which python3` --dev
 
-      - name: Lint
-        run: pipenv run --python `which python3` pylint scraper cli deployer
-      
-      - name: Test
+      - name: Run
         run: pipenv run --python `which python3` ./docsearch test no_browser
+        env:
+          algolia_application_id: E7EUGPZYED
+          algolia_api_key: ${{ secrets.ALGOLIA_API_KEY }}
+          file: crawler.json
 
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Lint
+      #   run: pipenv run --python `which python3` pylint scraper cli deployer
+      
+      # - name: Test
+      #   run: pipenv run --python `which python3` ./docsearch test no_browser
+
+      # - name: Log in to the Container registry
+      #   uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
 
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
-        with:
-          images: |
-            ghcr.io/${{ github.repository }}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+      #   with:
+      #     images: |
+      #       ghcr.io/${{ github.repository }}
 
 
-      - name: Build and push Docker images
-        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
-        with:
-          context: .
-          file: ./scraper/dev/docker/Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+      # - name: Build and push Docker images
+      #   uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+      #   with:
+      #     context: .
+      #     file: ./scraper/dev/docker/Dockerfile
+      #     push: true
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
