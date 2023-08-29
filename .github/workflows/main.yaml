@@ -13,6 +13,8 @@ jobs:
           python-version: '3.8' 
           cache: 'pipenv'
 
+      - uses: nanasess/setup-chromedriver@v2
+      
       - name: Install pipenv
         run: pip install pipenv
 
@@ -22,12 +24,9 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo API_ENDPOINT="https://xxx.execute-api.us-west-2.amazonaws.com" >> .env
+          echo APPLICATION_ID="E7EUGPZYED" >> .env
           echo API_KEY=${{ secrets.API_KEY }} >> .env
           cat .env
-        env:
-          APPLICATION_ID: E7EUGPZYED
-          API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
 
       - name: Run
         run: pipenv run --python `which python3` ./docsearch run crawler.json
