@@ -20,11 +20,10 @@ jobs:
         run: pipenv install --python `which python3` --dev
 
       - name: Run
-        run: pipenv run --python `which python3` ./docsearch test no_browser
+        run: pipenv run --python `which python3` ./docsearch run crawler.json
         env:
-          algolia_application_id: E7EUGPZYED
-          algolia_api_key: ${{ secrets.ALGOLIA_API_KEY }}
-          file: crawler.json
+          APPLICATION_ID: E7EUGPZYED
+          API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
 
       # - name: Lint
       #   run: pipenv run --python `which python3` pylint scraper cli deployer
