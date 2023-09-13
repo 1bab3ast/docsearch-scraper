@@ -18,25 +18,23 @@ class NbHitsUpdater:
         self.previous_nb_hits = previous_nb_hits
 
     def update(self, perform_update):
-        if self._update_needed():
-            print('previous nb_hits: {}\n'.format(self.previous_nb_hits))
-            if perform_update is None:
-                if sys.stdout.isatty():
-                    perform_update = confirm(
-                        'Do you want to update the nb_hits in {} ?'.format(
-                            self.config_file))
-                else:
-                    perform_update = True
+        if not self._update_needed():
+            return
+        print(f'previous nb_hits: {self.previous_nb_hits}\n')
+        if perform_update is None:
+            if sys.stdout.isatty():
+                perform_update = confirm(
+                    f'Do you want to update the nb_hits in {self.config_file} ?'
+                )
+            else:
+                perform_update = True
 
-            if perform_update:
-                try:
-                    self._update_config()
-                    print(
-                        '\n[OK] {} has been updated'.format(self.config_file))
-                except Exception:
-                    print(
-                        '\n[KO] Was not able to update {}'.format(
-                            self.config_file))
+        if perform_update:
+            try:
+                self._update_config()
+                print(f'\n[OK] {self.config_file} has been updated')
+            except Exception:
+                print(f'\n[KO] Was not able to update {self.config_file}')
 
     def _update_needed(self):
         return self.previous_nb_hits is None or self.previous_nb_hits != self.new_nb_hit

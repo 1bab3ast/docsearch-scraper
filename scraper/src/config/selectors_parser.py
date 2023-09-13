@@ -59,21 +59,20 @@ class SelectorsParser:
         return selectors_set
 
     def parse(self, config_selectors):
-        selectors = {}
-
         if 'lvl0' in config_selectors:
             config_selectors = {'default': config_selectors}
 
-        for selectors_key in config_selectors:
-            selectors[selectors_key] = self._parse_selectors_set(
-                config_selectors[selectors_key])
-
-        return selectors
+        return {
+            selectors_key: self._parse_selectors_set(
+                config_selectors[selectors_key]
+            )
+            for selectors_key in config_selectors
+        }
 
     @staticmethod
     def parse_min_indexed_level(min_indexed_level):
         min_indexed_level_object = min_indexed_level
-        if isinstance(min_indexed_level, int):
+        if isinstance(min_indexed_level_object, int):
             min_indexed_level_object = {
                 'default': min_indexed_level_object
             }

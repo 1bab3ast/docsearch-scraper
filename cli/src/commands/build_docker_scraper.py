@@ -20,9 +20,7 @@ class BuildDockerScraper(AbstractBuildDocker):
 
         # Order of options matter
         local_tag = self.get_option("local_tag", args)
-        test = self.get_option("test", args)
-
-        if test:
+        if test := self.get_option("test", args):
             return self.build_docker_file("scraper/dev/docker/Dockerfile.test",
                                           "algolia/docsearch-scraper-test",
                                           local_tag=local_tag)

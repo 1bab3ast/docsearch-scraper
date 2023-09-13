@@ -12,6 +12,6 @@ class PlaygroundConfig(AbstractCommand):
         from os import getcwd
 
         # TODO more generic way to get the path
-        playground_path = getcwd() + "/playground/index.html"
+        playground_path = f"{getcwd()}/playground/index.html"
 
         return self.exec_shell_command(["open", playground_path])

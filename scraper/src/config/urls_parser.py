@@ -43,31 +43,28 @@ class UrlsParser:
                 values = {}
                 for match in matches:
                     if 'variables' in start_url:
-                        if match in start_url['variables']:
-                            if isinstance(start_url['variables'][match], list):
-                                values[match] = start_url['variables'][match]
-                            else:
-                                if 'url' in start_url['variables'][
-                                    match] and 'js' in start_url['variables'][
-                                    match]:
-                                    executor = JsExecutor()
-                                    values[match] = executor.execute(
-                                        start_url['variables'][match]['url'],
-                                        start_url['variables'][match]['js'])
-                                else:
-                                    raise Exception(
-                                        "Bad arguments for variables." + match + " for url " +
-                                        start_url['url'])
+                        if match not in start_url['variables']:
+                            raise Exception(f"Missing {match} in variables for url " + start_url['url'])
+
+                        if isinstance(start_url['variables'][match], list):
+                            values[match] = start_url['variables'][match]
+                        elif (
+                            'url' in start_url['variables'][match]
+                            and 'js' in start_url['variables'][match]
+                        ):
+                            executor = JsExecutor()
+                            values[match] = executor.execute(
+                                start_url['variables'][match]['url'],
+                                start_url['variables'][match]['js'])
                         else:
                             raise Exception(
-                                "Missing " + match + " in variables" + " for url " +
-                                start_url['url'])
-
+                                f"Bad arguments for variables.{match} for url "
+                                + start_url['url']
+                            )
                 start_urls = UrlsParser.geturls(start_url, matches[0],
                                                 matches[1:], values,
                                                 start_urls)
 
-            # If there is no tag just keep it like this
             else:
                 start_urls.append(start_url)
 
@@ -88,7 +85,8 @@ class UrlsParser:
             copy_start_url = copy.copy(start_url)
             copy_start_url['original_url'] = copy_start_url['url']
             copy_start_url['url'] = copy_start_url['url'].replace(
-                "(?P<" + current_match + ">.*?)", value)
+                f"(?P<{current_match}>.*?)", value
+            )
             copy_start_url['compiled_url'] = re.compile(copy_start_url['url'])
             # Fix reference issue
             copy_start_url['url_attributes'] = copy.deepcopy(
@@ -108,9 +106,7 @@ class UrlsParser:
     def get_extra_facets(start_urls):
         extra_facets = []
         for start_url in start_urls:
-            for tag in start_url['url_attributes']:
-                extra_facets.append(tag)
-
+            extra_facets.extend(iter(start_url['url_attributes']))
         extra_facets = set(extra_facets)
 
         return list(extra_facets)
@@ -166,9 +162,7 @@ class UrlsParser:
     def get_url_variables(current_page_url, start_urls):
         for start_url in start_urls:
             compiled_url = start_url['compiled_url']
-            result = re.search(compiled_url, current_page_url)
-
-            if result:
+            if result := re.search(compiled_url, current_page_url):
                 for attr in start_url['url_attributes']:
                     value = start_url['url_attributes'][attr]
                     if value is not None:

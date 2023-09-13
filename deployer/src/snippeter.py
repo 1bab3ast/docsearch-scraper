@@ -56,19 +56,11 @@ We'd also be happy to get your feedback and thoughts about DocSearch - so we can
 
 Have a nice day :)"""
 
-    base_facet_template = """\n- Replace ${{CAPITALISE_NAME}} with the {{NAME}} you want to search on.
-   The list of possible {{NAME}} {{UPDATED}}.
-   So as of today you have: {{VALUES}}\n"""
-
-    base_example_template = """
-  For example if you want to refine the search to {{EXAMPLE_PHRASE}} just specify: 'facetFilters': [{{EXAMPLE_CODE}}]
-"""
-
     # Let the user know how they can access their Analytics
     analytics_details = ''
     if isinstance(analytics_statuses, dict):
         for email, analytics_status in list(analytics_statuses.items()):
-            analytics_details += '- ' + email
+            analytics_details += f'- {email}'
             if isinstance(analytics_status, str):
                 analytics_details += '''\
  can get access to the full Algolia analytics for your DocSearch index by creating an account,\
@@ -91,13 +83,14 @@ Have a nice day :)"""
         example_code = []
         example_options = []
 
+        base_facet_template = """\n- Replace ${{CAPITALISE_NAME}} with the {{NAME}} you want to search on.
+   The list of possible {{NAME}} {{UPDATED}}.
+   So as of today you have: {{VALUES}}\n"""
+
         for name, values in list(facets.items()):
             if name == "no_variables":
                 continue
-            keys = list(values.keys())
-            keys.sort()
-
-            if len(keys) > 0:
+            if keys := sorted(values.keys()):
                 updated = "is automatically fetched from your website" if _is_automatically_updated(
                     configs[config],
                     name) else "is hardcoded in the config"
@@ -106,14 +99,18 @@ Have a nice day :)"""
                     .replace("{{UPDATED}}", updated) \
                     .replace("{{VALUES}}", ', '.join(keys))
 
-                example_phrase.append('the ' + name + ' "' + keys[0] + '"')
+                example_phrase.append(f'the {name} "{keys[0]}"')
                 example_code.append("\"" + name + ":" + keys[0] + "\"")
                 example_options.append(
                     "\"" + name + ":$" + name.upper() + "\"")
 
-        if len(example_options) > 0:
+        if example_options:
             search_parameters += ",\n  searchParameters: { 'facetFilters': [" + (
                 ', '.join(example_options)) + "] }"
+            base_example_template = """
+  For example if you want to refine the search to {{EXAMPLE_PHRASE}} just specify: 'facetFilters': [{{EXAMPLE_CODE}}]
+"""
+
             facet_template += base_example_template.replace(
                 '{{EXAMPLE_PHRASE}}', ' and '.join(example_phrase)) \
                 .replace('{{EXAMPLE_CODE}}', ', '.join(example_code))
@@ -124,10 +121,10 @@ Have a nice day :)"""
     api_key = algolia_helper.get_docsearch_key(config)
     api_key = "### REPLACE ME ####" if api_key == 'Not found' else api_key
 
-    template = base_template.replace('{{API_KEY}}', api_key) \
-        .replace('{{INDEX_NAME}}', config) \
-        .replace('{{FACETS}}', facet_template) \
-        .replace('{{SEARCH_PARAMETERS}}', search_parameters) \
+    return (
+        base_template.replace('{{API_KEY}}', api_key)
+        .replace('{{INDEX_NAME}}', config)
+        .replace('{{FACETS}}', facet_template)
+        .replace('{{SEARCH_PARAMETERS}}', search_parameters)
         .replace('{{ANALYTICS}}', analytics_details)
-
-    return template
+    )

@@ -9,7 +9,7 @@ class RunConfig(AbstractCommand):
         return "Run a config"
 
     def get_usage(self):
-        return super(RunConfig, self).get_usage() + " config"
+        return f"{super(RunConfig, self).get_usage()} config"
 
     def get_options(self):
         return [{"name": "config", "description": "path to the config to run"}]

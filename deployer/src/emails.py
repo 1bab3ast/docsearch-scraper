@@ -10,7 +10,7 @@ def _prompt_command(emails):
     prompt = '===\na <emails>... (add), d <nb> (delete), c <nb> <new> (change), empty to confirm\n> '
 
     for i, e in enumerate(emails):
-        print('{}) {}'.format(i, e))
+        print(f'{i}) {e}')
     ans = input(prompt).strip().split()
 
     if len(ans) == 0:
@@ -22,7 +22,7 @@ def _prompt_command(emails):
 
     if ans[0] == 'a':
         emails += ans[1:]
-    elif ans[0] == 'c' or ans[0] == 'd':
+    elif ans[0] in ['c', 'd']:
         try:
             idx = int(ans[1])
         except ValueError:
@@ -40,14 +40,14 @@ def _prompt_command(emails):
                 return _prompt_command(emails)
             emails[idx] = ans[2]
     else:
-        print('/!\\ Invalid command {}'.format(' '.join(ans)))
+        print(f"/!\\ Invalid command {' '.join(ans)}")
         return _prompt_command(emails)
 
     return emails
 
 
 def _retrieve(config_name, config_dir):
-    file_path = path.join(config_dir, 'infos', config_name + '.json')
+    file_path = path.join(config_dir, 'infos', f'{config_name}.json')
 
     if path.isfile(file_path):
         with open(file_path, 'r') as f:
@@ -58,8 +58,8 @@ def _retrieve(config_name, config_dir):
 
 
 def _commit_push(config_name, action, config_dir):
-    txt = path.join('infos', config_name + '.json')
-    commit_message = 'deploy: {} emails for {}'.format(action, config_name)
+    txt = path.join('infos', f'{config_name}.json')
+    commit_message = f'deploy: {action} emails for {config_name}'
 
     old_dir = os.getcwd()
     os.chdir(config_dir)
@@ -76,7 +76,7 @@ def _commit_push(config_name, action, config_dir):
 
 
 def _write(emails, config_name, config_dir):
-    file_path = path.join(config_dir, 'infos', config_name + '.json')
+    file_path = path.join(config_dir, 'infos', f'{config_name}.json')
     new_file = True
 
     obj = OrderedDict((
@@ -131,14 +131,9 @@ def add(config_name, config_dir, emails_to_add=None):
 
 
 def add_emails(config_name, emails):
-    analytics_statuses = {}
-
     from deployer.src.algolia_internal_api import add_user_to_index
 
-    for email in emails:
-        analytics_statuses[email] = add_user_to_index(config_name, email)
-
-    return analytics_statuses
+    return {email: add_user_to_index(config_name, email) for email in emails}
 
 
 def delete_emails(config_name, emails):
@@ -149,7 +144,7 @@ def delete_emails(config_name, emails):
 
 
 def delete(config_name, config_dir):
-    file_path = path.join(config_dir, 'infos', config_name + '.json')
+    file_path = path.join(config_dir, 'infos', f'{config_name}.json')
     if path.isfile(file_path):
         emails = _retrieve(config_name, config_dir)
         delete_emails(config_name, emails)

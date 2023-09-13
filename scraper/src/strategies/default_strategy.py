@@ -40,16 +40,13 @@ class DefaultStrategy(AbstractStrategy):
         self.dom = self.remove_from_dom(self.dom,
                                         self.config.selectors_exclude)
 
-        records = self.get_records_from_dom(response.url)
-
-        return records
+        return self.get_records_from_dom(response.url)
 
     def _update_hierarchy_with_global_content(self, hierarchy,
                                               current_level_int):
         for index in range(0, current_level_int + 1):
-            if 'lvl{}'.format(index) in self.global_content:
-                hierarchy['lvl{}'.format(index)] = self.global_content[
-                    'lvl{}'.format(index)]
+            if f'lvl{index}' in self.global_content:
+                hierarchy[f'lvl{index}'] = self.global_content[f'lvl{index}']
 
         return hierarchy
 
@@ -99,8 +96,8 @@ class DefaultStrategy(AbstractStrategy):
                 anchors[current_level] = Anchor.get_anchor(node)
 
                 for index in range(current_level_int + 1, 7):
-                    hierarchy['lvl{}'.format(index)] = None
-                    anchors['lvl{}'.format(index)] = None
+                    hierarchy[f'lvl{index}'] = None
+                    anchors[f'lvl{index}'] = None
                 previous_hierarchy = hierarchy
 
                 if self.config.only_content_level:
@@ -170,12 +167,7 @@ class DefaultStrategy(AbstractStrategy):
                 content = meta_node.get('content')
                 if name and name.startswith('docsearch:') and content:
                     name = name.replace('docsearch:', '')
-                    jsonized = to_json(content)
-                    if jsonized:
-                        record[name] = jsonized
-                    else:
-                        record[name] = content
-
+                    record[name] = jsonized if (jsonized := to_json(content)) else content
                     if name == "version":
                         version = str(content)
                         # Handle version as comma-separated tokens
@@ -235,7 +227,7 @@ class DefaultStrategy(AbstractStrategy):
     def _get_closest_anchor(anchors):
         # Getting the element anchor as the closest one
         for index in list(range(6, -1, -1)):
-            potential_anchor = anchors['lvl{}'.format(index)]
+            potential_anchor = anchors[f'lvl{index}']
             if potential_anchor is None:
                 continue
             return potential_anchor
@@ -348,6 +340,6 @@ class DefaultStrategy(AbstractStrategy):
     def _get_url_with_anchor(self, current_page_url, anchor):
         if (
                 not self.config.js_render or not self.config.use_anchors) and anchor is not None:
-            return current_page_url + '#' + anchor
+            return f'{current_page_url}#{anchor}'
 
         return current_page_url

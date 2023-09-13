@@ -26,8 +26,7 @@ class ConfigManager:
             try:
                 config_name = config_name.decode()
             except AttributeError:
-                print("Error decoding non string var {}".format(config_name))
-                pass
+                print(f"Error decoding non string var {config_name}")
             encoded.append(config_name)
         return encoded
 
@@ -89,7 +88,7 @@ class ConfigManager:
         def add_config(self, config_name):
             key = algolia_helper.add_docsearch_key(config_name)
 
-            print(config_name + ' (' + key + ')')
+            print(f'{config_name} ({key})')
             config = self.ref_configs[config_name]
 
             print('\n================================\n')
@@ -110,39 +109,35 @@ class ConfigManager:
                 add_draft(cuid, note_content)
 
                 print(
-                    'Email address fetched and stored, conversation updated and available at {}\n'.format(
-                        get_conversation_url_from_cuid(cuid)))
+                    f'Email address fetched and stored, conversation updated and available at {get_conversation_url_from_cuid(cuid)}\n'
+                )
 
+            elif helpers.confirm(f'\nDo you want to add emails for {config_name}?'):
+                analytics_statuses = emails.add(config_name,
+                                                self.private_dir)
+                print(snippeter.get_email_for_config(config_name,
+                                                     analytics_statuses))
             else:
-                if helpers.confirm(
-                        '\nDo you want to add emails for {}?'.format(
-                            config_name)):
-                    analytics_statuses = emails.add(config_name,
-                                                    self.private_dir)
-                    print(snippeter.get_email_for_config(config_name,
-                                                         analytics_statuses))
-                else:
-                    print(snippeter.get_email_for_config(config_name))
+                print(snippeter.get_email_for_config(config_name))
 
         def update_config(self, config_name):
             message = config_name
 
             key = algolia_helper.get_docsearch_key(config_name)
-            message = message + ' (' + key + ')'
+            message = f'{message} ({key})'
 
             print(message)
 
             print('\n================================\n')
             print(snippeter.get_email_for_config(config_name))
 
-            if helpers.confirm(
-                    '\nDo you want to add emails for {}?'.format(config_name)):
+            if helpers.confirm(f'\nDo you want to add emails for {config_name}?'):
                 emails.add(config_name, self.private_dir)
 
         def remove_config(self, config_name):
             algolia_helper.delete_docsearch_key(config_name)
             algolia_helper.delete_docsearch_index(config_name)
-            algolia_helper.delete_docsearch_index(config_name + '_tmp')
+            algolia_helper.delete_docsearch_index(f'{config_name}_tmp')
             analytics_keys = algolia_helper.list_index_analytics_key(
                 config_name)
             for key in analytics_keys:

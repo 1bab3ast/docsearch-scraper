@@ -40,9 +40,18 @@ def print_command_help(command, no_ansi=False):
 
     for option in options:
         nb_spaces = longest_option + 2 - len(option["name"])
-        printer("  " + get_color(1) + option["name"] + get_color() + (
-            " " * nb_spaces) + option["description"])
+        printer(
+            (
+                (
+                    f"  {get_color(1)}"
+                    + option["name"]
+                    + get_color()
+                    + " " * nb_spaces
+                )
+                + option["description"]
+            )
+        )
 
     printer("")
     printer("Help:", 2)
-    printer("  " + command.get_description())
+    printer(f"  {command.get_description()}")

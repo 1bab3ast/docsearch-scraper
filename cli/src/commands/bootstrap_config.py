@@ -29,21 +29,19 @@ class BootstrapConfig(AbstractCommand):
             config_folder += "/configs"
             if not path.isdir(config_folder):
                 self.print_config(config)
-                print("Folder: " + config_folder + " does not exist")
+                print(f"Folder: {config_folder} does not exist")
                 return
 
-            file_path = config_folder + "/" + config["index_name"] + ".json"
+            file_path = f"{config_folder}/" + config["index_name"] + ".json"
 
             if path.isfile(file_path):
                 self.print_config(config)
-                print("File: " + file_path + " already exists")
+                print(f"File: {file_path} already exists")
                 return
 
-            file = open(file_path, "w")
-            file.write(self.config_to_s(config))
-            file.close()
-
-            print(file_path + " has been created")
+            with open(file_path, "w") as file:
+                file.write(self.config_to_s(config))
+            print(f"{file_path} has been created")
 
     def config_to_s(self, config):
         import json
@@ -96,7 +94,4 @@ def key_sort(attr):
         "comments": 29,
         "nb_hits": 30
     }
-    if attr[0] in list(ref.keys()):
-        return ref[attr[0]]
-    else:
-        return 27
+    return ref[attr[0]] if attr[0] in list(ref.keys()) else 27

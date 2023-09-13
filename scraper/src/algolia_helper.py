@@ -35,18 +35,15 @@ class AlgoliaHelper:
         color = "96" if from_sitemap else "94"
 
         print(
-            '\033[{}m> DocSearch: \033[0m{}\033[93m {} records\033[0m)'.format(
-                color, url, record_count))
+            f'\033[{color}m> DocSearch: \033[0m{url}\033[93m {record_count} records\033[0m)'
+        )
 
     def add_synonyms(self, synonyms):
-        synonyms_list = []
-        for _, value in list(synonyms.items()):
-            synonyms_list.append(value)
-
+        synonyms_list = [value for _, value in list(synonyms.items())]
         self.algolia_index_tmp.save_synonyms(synonyms_list)
         print(
-            '\033[94m> DocSearch: \033[0m Synonyms (\033[93m{} synonyms\033[0m)'.format(
-                len(synonyms_list)))
+            f'\033[94m> DocSearch: \033[0m Synonyms (\033[93m{len(synonyms_list)} synonyms\033[0m)'
+        )
 
     def commit_tmp_index(self):
         """Overwrite the real index with the temporary one"""

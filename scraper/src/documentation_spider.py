@@ -47,20 +47,21 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
     @staticmethod
     def to_other_scheme(url):
         """Return a list with the translation to this url into each other scheme."""
-        other_scheme_urls = []
         match = DocumentationSpider.match_capture_any_scheme.match(url)
         assert match
-        if not (match and match.group(1) and match.group(2)):
+        if not match or not match.group(1) or not match.group(2):
             raise ValueError(
-                "Must have a match and split the url into the scheme and the rest. url: " + url)
+                f"Must have a match and split the url into the scheme and the rest. url: {url}"
+            )
 
         previous_scheme = match.group(1)
         url_with_no_scheme = match.group(2)
 
-        for scheme in DocumentationSpider.every_schemes:
-            if scheme != previous_scheme:
-                other_scheme_urls.append(scheme + url_with_no_scheme)
-        return other_scheme_urls
+        return [
+            scheme + url_with_no_scheme
+            for scheme in DocumentationSpider.every_schemes
+            if scheme != previous_scheme
+        ]
 
     def __init__(self, config, algolia_helper, strategy, *args, **kwargs):
         # Scrapy config
@@ -104,12 +105,14 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
             # In case we don't have a special documentation regex,
             # we assume that start_urls are there to match a documentation part
             self.sitemap_urls_regexs =\
-                config.sitemap_urls_regexs if config.sitemap_urls_regexs else start_urls_any_scheme
+                    config.sitemap_urls_regexs if config.sitemap_urls_regexs else start_urls_any_scheme
 
             sitemap_rules = []
             if self.sitemap_urls_regexs:
-                for regex in self.sitemap_urls_regexs:
-                    sitemap_rules.append((regex, 'parse_from_sitemap'))
+                sitemap_rules.extend(
+                    (regex, 'parse_from_sitemap')
+                    for regex in self.sitemap_urls_regexs
+                )
             else:  # Neither start url nor regex: default, we parse all
                 print("Neither start url nor regex: default, we scrap all")
                 sitemap_rules = [('.*', 'parse_from_sitemap')]
@@ -153,10 +156,8 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
         # Arbitrary limit
         if self.nb_hits_max > 0 and DocumentationSpider.NB_INDEXED > self.nb_hits_max:
             DocumentationSpider.NB_INDEXED = 0
-            self.reason_to_stop = "Too much hits, DocSearch only handle {} records".format(
-                int(self.nb_hits_max))
+            self.reason_to_stop = f"Too much hits, DocSearch only handle {int(self.nb_hits_max)} records"
             raise ValueError(self.reason_to_stop)
-            exit(EXIT_CODE_EXCEEDED_RECORDS)
 
     def parse_from_sitemap(self, response):
         if self.reason_to_stop is not None:
@@ -198,11 +199,10 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
                 if rule.link_extractor._link_allowed(response.request):
                     response.replace(url=response.request.url)
                     continue
-            else:
-                if rule.link_extractor._link_allowed(
+            elif rule.link_extractor._link_allowed(
                         response) and rule.link_extractor._link_allowed(
                     response.request):
-                    continue
+                continue
             return False
 
         return True

@@ -9,7 +9,7 @@ class InviteRemoveUser(AbstractCommand):
         return "Uninvite to an DocSearch index an email"
 
     def get_usage(self):
-        return super(InviteRemoveUser, self).get_usage() + " config email"
+        return f"{super(InviteRemoveUser, self).get_usage()} config email"
 
     def get_options(self):
         return [
