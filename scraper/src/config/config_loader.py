@@ -104,7 +104,6 @@ class ConfigLoader:
             return data
         except ValueError:
             raise ValueError('CONFIG is not a valid JSON')
-            exit(EXIT_CODE_WRONG_CONFIG)
 
     def _parse(self):
         # Parse Env
@@ -114,7 +113,9 @@ class ConfigLoader:
         if self.update_nb_hits is not None:
             self.update_nb_hits = bool(strtobool(self.update_nb_hits))
         if self.index_name_tmp is None:
-            self.index_name_tmp = os.environ.get('INDEX_NAME_TMP', self.index_name + '_tmp')
+            self.index_name_tmp = os.environ.get(
+                'INDEX_NAME_TMP', f'{self.index_name}_tmp'
+            )
 
         # Parse config
         self.selectors = SelectorsParser().parse(self.selectors)

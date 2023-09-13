@@ -21,5 +21,5 @@ def config(additional_config={}):
         'use_anchors': False
     }
     final_config = base_config.copy()
-    final_config.update(additional_config)
+    final_config |= additional_config
     return json.dumps(final_config)

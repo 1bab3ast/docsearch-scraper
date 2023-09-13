@@ -46,8 +46,10 @@ def run_config(config):
     )
 
     root_module = 'src.' if __name__ == '__main__' else 'scraper.src.'
-    DOWNLOADER_MIDDLEWARES_PATH = root_module + 'custom_downloader_middleware.' + CustomDownloaderMiddleware.__name__
-    DUPEFILTER_CLASS_PATH = root_module + 'custom_dupefilter.' + CustomDupeFilter.__name__
+    DOWNLOADER_MIDDLEWARES_PATH = f'{root_module}custom_downloader_middleware.{CustomDownloaderMiddleware.__name__}'
+    DUPEFILTER_CLASS_PATH = (
+        f'{root_module}custom_dupefilter.{CustomDupeFilter.__name__}'
+    )
 
     headers = {
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -55,12 +57,10 @@ def run_config(config):
     }  # Defaults for scrapy https://docs.scrapy.org/en/latest/topics/settings.html#default-request-headers
 
     if os.getenv("CF_ACCESS_CLIENT_ID") and os.getenv("CF_ACCESS_CLIENT_SECRET"):
-        headers.update(
-            {
-                "CF-Access-Client-Id": os.getenv("CF_ACCESS_CLIENT_ID"),
-                "CF-Access-Client-Secret": os.getenv("CF_ACCESS_CLIENT_SECRET"),
-            }
-        )
+        headers |= {
+            "CF-Access-Client-Id": os.getenv("CF_ACCESS_CLIENT_ID"),
+            "CF-Access-Client-Secret": os.getenv("CF_ACCESS_CLIENT_SECRET"),
+        }
     elif os.getenv("IAP_AUTH_CLIENT_ID") and os.getenv("IAP_AUTH_SERVICE_ACCOUNT_JSON"):
         iap_token = IAPAuth(
             client_id=os.getenv("IAP_AUTH_CLIENT_ID"),
@@ -68,7 +68,7 @@ def run_config(config):
                 os.getenv("IAP_AUTH_SERVICE_ACCOUNT_JSON")
             ),
         )(requests.Request()).headers["Authorization"]
-        headers.update({"Authorization": iap_token})
+        headers["Authorization"] = iap_token
 
     DEFAULT_REQUEST_HEADERS = headers
 
@@ -105,10 +105,10 @@ def run_config(config):
 
     if DocumentationSpider.NB_INDEXED > 0:
         algolia_helper.commit_tmp_index()
-        print('Nb hits: {}'.format(DocumentationSpider.NB_INDEXED))
+        print(f'Nb hits: {DocumentationSpider.NB_INDEXED}')
         config.update_nb_hits_value(DocumentationSpider.NB_INDEXED)
     else:
-        print('Crawling issue: nbHits 0 for ' + config.index_name)
+        print(f'Crawling issue: nbHits 0 for {config.index_name}')
         exit(EXIT_CODE_NO_RECORD)
     print("")
 

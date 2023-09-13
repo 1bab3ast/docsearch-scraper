@@ -16,7 +16,6 @@ class JsExecutor:
         result = self.driver.execute_script(js)
 
         try:
-            parsed_result = json.loads(result)
-            return parsed_result
+            return json.loads(result)
         except ValueError:
             raise ValueError('CONFIG is not a valid JSON')

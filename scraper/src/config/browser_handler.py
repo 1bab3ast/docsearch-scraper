@@ -30,8 +30,8 @@ class BrowserHandler:
                                                "/usr/bin/chromedriver")
             if not os.path.isfile(CHROMEDRIVER_PATH):
                 raise Exception(
-                    "Env CHROMEDRIVER_PATH='{}' is not a path to a file".format(
-                        CHROMEDRIVER_PATH))
+                    f"Env CHROMEDRIVER_PATH='{CHROMEDRIVER_PATH}' is not a path to a file"
+                )
             driver = webdriver.Chrome(
                 CHROMEDRIVER_PATH,
                 options=chrome_options)

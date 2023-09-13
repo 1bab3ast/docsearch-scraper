@@ -10,7 +10,7 @@ class RunConfigDocker(AbstractCommand):
         return "Run a config using docker"
 
     def get_usage(self):
-        return super(RunConfigDocker, self).get_usage() + " config"
+        return f"{super(RunConfigDocker, self).get_usage()} config"
 
     def get_options(self):
         return [{"name": "config",
@@ -31,13 +31,11 @@ class RunConfigDocker(AbstractCommand):
 
         self.check_not_docsearch_app_id("run a config manually")
 
-        if os.path.isfile(args[0]):
-            f = open(args[0], "r")
-            config = f.read()
-        else:
-            raise ValueError(
-                "Config option: {} is not a path to a file".format(args[0]))
+        if not os.path.isfile(args[0]):
+            raise ValueError(f"Config option: {args[0]} is not a path to a file")
 
+        f = open(args[0], "r")
+        config = f.read()
         from_local_code = self.get_option("from_local_code", args)
 
         if from_local_code:
@@ -57,17 +55,13 @@ class RunConfigDocker(AbstractCommand):
             "-e",
             "API_KEY=" + os.environ.get("API_KEY"),
             "-e",
-            "CONFIG=" + config,
+            f"CONFIG={config}",
         ]
 
         if from_local_code:
             run_command.append("-v")
-            run_command.append(os.getcwd() + "/scraper/src:/root/src")
+            run_command.append(f"{os.getcwd()}/scraper/src:/root/src")
 
-        run_command = run_command + ["--name",
-                                     container_name,
-                                     "-t",
-                                     image_name,
-                                     "bash"]
+        run_command += ["--name", container_name, "-t", image_name, "bash"]
 
         return self.exec_shell_command(run_command)

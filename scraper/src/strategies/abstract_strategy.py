@@ -30,7 +30,7 @@ class AbstractStrategy:
         try:
             body = response.body.decode(response.encoding)
             return body
-        except (UnicodeError, ValueError, AttributeError):
+        except (ValueError, AttributeError):
             return response.body
 
     @staticmethod
@@ -39,7 +39,7 @@ class AbstractStrategy:
         try:
             body = response.body.decode(response.encoding)
             result = lxml.html.fromstring(body)
-        except (UnicodeError, ValueError):
+        except ValueError:
             result = lxml.html.fromstring(response.body)
 
         return result
@@ -86,10 +86,9 @@ class AbstractStrategy:
             if node.tag not in AbstractStrategy.keep_tags:
                 yield node.text
             else:
-                yield '<' + node.tag + '>' + node.text + '</' + node.tag + '>'
+                yield f'<{node.tag}>{node.text}</{node.tag}>'
         for e in node:
-            for s in AbstractStrategy.itertext(e):
-                yield s
+            yield from AbstractStrategy.itertext(e)
             if e.tail:
                 yield e.tail
 
@@ -98,8 +97,8 @@ class AbstractStrategy:
         text = html.escape(text)
 
         for tag in AbstractStrategy.keep_tags:
-            opening_tag = "<" + tag + ">"
-            closing_tag = "</" + tag + ">"
+            opening_tag = f"<{tag}>"
+            closing_tag = f"</{tag}>"
             text = text.replace(html.escape(opening_tag), opening_tag)
             text = text.replace(html.escape(closing_tag), closing_tag)
 
@@ -116,7 +115,7 @@ class AbstractStrategy:
         if not isinstance(text, str):
             text = ""
             for s in AbstractStrategy.itertext(element):
-                text = text + " " + s
+                text = f"{text} {s}"
 
         # We call strip a first time for space, tab, newline, return and formfeed
         text = text.strip()
@@ -124,10 +123,7 @@ class AbstractStrategy:
         if strip_chars is not None:
             text = text.strip(strip_chars)
 
-        if len(text) == 0:
-            return None
-
-        return AbstractStrategy.escape(text)
+        return None if len(text) == 0 else AbstractStrategy.escape(text)
 
     @staticmethod
     def get_text_from_nodes(elements, strip_chars=None):
@@ -148,10 +144,7 @@ class AbstractStrategy:
              elements
              if AbstractStrategy.get_text(element, strip_chars) is not None])
 
-        if len(text) == 0:
-            return None
-
-        return AbstractStrategy.escape(text)
+        return None if not text else AbstractStrategy.escape(text)
 
     @staticmethod
     def remove_from_dom(dom, exclude_selectors):
@@ -180,7 +173,6 @@ class AbstractStrategy:
         >>> self.get_level_weight('lvl3') = 70
         >>> self.get_level_weight('content') = 0
         """
-        matches = re.match(r'lvl([0-9]*)', level)
-        if matches:
+        if matches := re.match(r'lvl([0-9]*)', level):
             return 100 - int(matches.group(1)) * 10
         return 0

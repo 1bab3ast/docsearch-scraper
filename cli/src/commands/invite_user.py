@@ -9,7 +9,7 @@ class InviteUser(AbstractCommand):
         return "Invite to an DocSearch index an email"
 
     def get_usage(self):
-        return super(InviteUser, self).get_usage() + " config email"
+        return f"{super(InviteUser, self).get_usage()} config email"
 
     def get_options(self):
         return [

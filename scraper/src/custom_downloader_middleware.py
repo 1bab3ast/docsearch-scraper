@@ -20,10 +20,10 @@ class CustomDownloaderMiddleware:
 
         if spider.remove_get_params:
             o = urlparse(request.url)
-            url_without_params = o.scheme + "://" + o.netloc + o.path
+            url_without_params = f"{o.scheme}://{o.netloc}{o.path}"
             request = request.replace(url=url_without_params)
 
-        print("Getting " + request.url + " from selenium")
+        print(f"Getting {request.url} from selenium")
 
         self.driver.get(unquote_plus(
             request.url))  # Decode url otherwise firefox is not happy. Ex /#%21/ => /#!/%21
@@ -44,10 +44,10 @@ class CustomDownloaderMiddleware:
 
         if spider.remove_get_params:
             o = urlparse(response.url)
-            url_without_params = o.scheme + "://" + o.netloc + o.path
+            url_without_params = f"{o.scheme}://{o.netloc}{o.path}"
             response = response.replace(url=url_without_params)
 
-        if response.url == request.url + '#':
+        if response.url == f'{request.url}#':
             response = response.replace(url=request.url)
 
         return response

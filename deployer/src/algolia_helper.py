@@ -24,37 +24,41 @@ def get_facets(config):
     except Exception:
         return None
 
-    if 'facets' in res:
-        return res['facets']
-
-    return None
+    return res['facets'] if 'facets' in res else None
 
 
 def update_docsearch_key(config, key):
-    algolia_client_prod.update_api_key(key, {
-        'indexes': [config],
-        'description': 'docsearch frontend ' + config,
-        'acl': ['search']
-    })
+    algolia_client_prod.update_api_key(
+        key,
+        {
+            'indexes': [config],
+            'description': f'docsearch frontend {config}',
+            'acl': ['search'],
+        },
+    )
 
 
 def get_docsearch_key(config):
     k = 'Not found'
     # find a key
     for key in algolia_client_prod.list_api_keys()['keys']:
-        if 'description' in key and 'docsearch frontend ' + config == key['description'] and key["acl"] == ["search"]:
+        if (
+            'description' in key
+            and f'docsearch frontend {config}' == key['description']
+            and key["acl"] == ["search"]
+        ):
             k = key['value']
     return k
 
 
 def add_docsearch_key(config):
     if not isinstance(config, str) or '*' in config:
-        raise ValueError("index name : {} is not safe".format(config))
+        raise ValueError(f"index name : {config} is not safe")
 
-    response = algolia_client_prod.add_api_key(['search'], {
-        'indexes': [config],
-        'description': 'docsearch frontend ' + config,
-    })
+    response = algolia_client_prod.add_api_key(
+        ['search'],
+        {'indexes': [config], 'description': f'docsearch frontend {config}'},
+    )
 
     return response['key']
 
@@ -70,9 +74,11 @@ def delete_docsearch_index(config):
 
 
 def list_index_analytics_key(config_name):
-    analytics_keys = []
     keys = algolia_client_prod.list_api_keys()['keys']
-    for key in keys:
-        if 'indexes' in key and config_name in key['indexes'] and 'analytics' in key['acl']:
-            analytics_keys.append(key)
-    return analytics_keys
+    return [
+        key
+        for key in keys
+        if 'indexes' in key
+        and config_name in key['indexes']
+        and 'analytics' in key['acl']
+    ]

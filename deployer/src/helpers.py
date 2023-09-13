@@ -17,10 +17,10 @@ def confirm(message="Confirm"):
             print('please enter y or n.')
             continue
 
-        if ans == 'y' or ans == 'Y':
+        if ans in ['y', 'Y']:
             return True
 
-        if ans == 'n' or ans == 'N':
+        if ans in ['n', 'N']:
             return False
 
 
@@ -42,17 +42,15 @@ def make_request(endpoint, type=None, data=None, username=None, password=None,
     import requests
 
     if "://" not in endpoint:
-        print("Wrong endpoint:{}, it should be a complete URL".format(endpoint))
+        print(f"Wrong endpoint:{endpoint}, it should be a complete URL")
         exit(6)
 
     if username is None or password is None:
-        print("{}: both username and password must be set".format(endpoint))
+        print(f"{endpoint}: both username and password must be set")
         exit(7)
 
-    success_codes = [200, 201, 204]
-
     if data and not isinstance(data, dict):
-        raise ValueError(data + " must be a dict ")
+        raise ValueError(f"{data} must be a dict ")
 
     if type == 'POST':
         if json_request:
@@ -65,8 +63,7 @@ def make_request(endpoint, type=None, data=None, username=None, password=None,
                               data=data)
 
         if r.status_code // 100 != 2:
-            print('ISSUE for POST request : {} with params: {}'.format(endpoint,
-                data))
+            print(f'ISSUE for POST request : {endpoint} with params: {data}')
             print(r.text)
         return r
 
@@ -74,9 +71,10 @@ def make_request(endpoint, type=None, data=None, username=None, password=None,
         r = requests.delete(endpoint,
                             auth=(username, password))
 
+        success_codes = [200, 201, 204]
+
         if r.status_code not in success_codes:
-            print('ISSUE for DELETE request : {} with params: {}'.format(endpoint,
-                                                                       data))
+            print(f'ISSUE for DELETE request : {endpoint} with params: {data}')
         return r
 
     if type == 'PUT':
@@ -85,20 +83,19 @@ def make_request(endpoint, type=None, data=None, username=None, password=None,
                          data=data)
         print(r.status_code)
         if r.status_code // 100 != 2:
-            print('ISSUE for PUT request : {} with params: {}'.format(endpoint,
-                data))
+            print(f'ISSUE for PUT request : {endpoint} with params: {data}')
         return r
 
-    if data != None:
-        r = requests.get(endpoint,
-                         auth=(username, password),
-                         params=data)
-    else:
+    if data is None:
         r = requests.get(endpoint,
                          auth=(username, password))
 
+    else:
+        r = requests.get(endpoint,
+                         auth=(username, password),
+                         params=data)
     if r.status_code // 100 != 2:
-        print('ISSUE for GET request : {} with params: {}'.format(endpoint, data))
+        print(f'ISSUE for GET request : {endpoint} with params: {data}')
 
     if json_request:
         r.json()

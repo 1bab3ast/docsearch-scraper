@@ -11,8 +11,11 @@ from scrapy.selector import Selector
 def get_sitemap_if_available(url):
     if not url.endswith("sitemap.xml"):
         reMatch = re.search(".+?([^/]/(?!/))", url)
-        url = url + "/sitemap.xml" if reMatch is None else reMatch.group() + \
-            "sitemap.xml"
+        url = (
+            f"{url}/sitemap.xml"
+            if reMatch is None
+            else reMatch.group() + "sitemap.xml"
+        )
 
     return [url] if requests.get(url).status_code == 200 else []
 
@@ -35,11 +38,7 @@ def extract_root_from_input(input_string):
         # Path is redirecting to a page
         if ('html' in path_splited[-1]):
             url_parsed = url_parsed._replace(path='/'.join(path_splited[: -1]))
-        # We are fine
-        else:
-            pass
-
-        return url_parsed.geturl() + '/'
+        return f'{url_parsed.geturl()}/'
     except ValueError:
         return domain.group() if domain else input_string
 
@@ -47,35 +46,34 @@ def extract_root_from_input(input_string):
 def assert_list_non_empty(list_to_check):
     # Check if the input is not None or empty. Otherwise, it raises an exception
     if not list_to_check or len(list_to_check) == 0:
-        raise Exception('{} is None or empty'.format(list_to_check))
+        raise Exception(f'{list_to_check} is None or empty')
 
 
 def to_fixme_config(config, urls):
     config["sitemap_urls"] = get_sitemap_if_available(urls[0])
     config["start_urls"] = urls
 
-    mainSelector = "FIXME"
     response = requests.get(urls[0])
     selector = Selector(text=response.content)
 
+    mainSelector = "FIXME"
     if len(selector.css("article").extract()):
         mainSelector = "article"
     elif len(selector.css("main").extract()):
         mainSelector = "main"
 
-    if not mainSelector == "FIXME":
+    if mainSelector != "FIXME":
         config["selectors"]["lvl0"] = OrderedDict((
             ("selector", ""),
             ("global", True),
             ("default_value", "Documentation")
         ))
-        config["selectors"]["lvl1"] = mainSelector + " h1"
-        config["selectors"]["lvl2"] = mainSelector + " h2"
-        config["selectors"]["lvl3"] = mainSelector + " h3"
-        config["selectors"]["lvl4"] = mainSelector + " h4"
-        config["selectors"]["lvl5"] = mainSelector + " h5"
-        config["selectors"]["text"] = mainSelector + \
-            " p, " + mainSelector + " li"
+        config["selectors"]["lvl1"] = f"{mainSelector} h1"
+        config["selectors"]["lvl2"] = f"{mainSelector} h2"
+        config["selectors"]["lvl3"] = f"{mainSelector} h3"
+        config["selectors"]["lvl4"] = f"{mainSelector} h4"
+        config["selectors"]["lvl5"] = f"{mainSelector} h5"
+        config["selectors"]["text"] = f"{mainSelector} p, {mainSelector} li"
 
     return config
 
@@ -83,7 +81,8 @@ def to_fixme_config(config, urls):
 def to_docusaurus_config(config, urls):
     assert_list_non_empty(urls)
     config["sitemap_urls"] = get_sitemap_if_available(
-        extract_root_from_input(urls[0]) + "sitemap.xml")
+        f"{extract_root_from_input(urls[0])}sitemap.xml"
+    )
     config["sitemap_alternate_links"] = True
     config["custom_settings"] = {
         "attributesForFaceting": ["language", "version"]}
@@ -114,7 +113,8 @@ def to_docusaurus_config(config, urls):
 def to_docusaurus_v2_config(config, urls):
     assert_list_non_empty(urls)
     config["sitemap_urls"] = get_sitemap_if_available(
-        extract_root_from_input(urls[0]) + "sitemap.xml")
+        f"{extract_root_from_input(urls[0])}sitemap.xml"
+    )
     config["sitemap_alternate_links"] = True
     start_url = urls[0]
     if not start_url.endswith('/'):
@@ -168,30 +168,25 @@ def to_gitbook_config(config):
 def to_pkgdown_config(config, urls=None):
     if urls:
         root = extract_root_from_input(urls[0])
-        config["start_urls"] = [{
-            "url": root + "index.html",
-            "selectors_key": "homepage",
-            "tags": [
-                "homepage"
-            ]
-        },
+        config["start_urls"] = [
             {
-                "url": root + "reference",
+                "url": f"{root}index.html",
+                "selectors_key": "homepage",
+                "tags": ["homepage"],
+            },
+            {
+                "url": f"{root}reference",
                 "selectors_key": "reference",
-                "tags": [
-                    "reference"
-                ]
-        },
+                "tags": ["reference"],
+            },
             {
-                "url": root + "articles",
+                "url": f"{root}articles",
                 "selectors_key": "articles",
-                "tags": [
-                    "articles"
-                ]
-        }]
+                "tags": ["articles"],
+            },
+        ]
 
-        config["sitemap_urls"] = get_sitemap_if_available(
-            root + "sitemap.xml")
+        config["sitemap_urls"] = get_sitemap_if_available(f"{root}sitemap.xml")
 
     config["selectors"] = OrderedDict((
         ("homepage", OrderedDict((
@@ -286,7 +281,8 @@ def to_vuepress_config(config, urls):
 def to_larecipe_config(config, urls=None):
     if urls:
         config["sitemap_urls"] = get_sitemap_if_available(
-            extract_root_from_input(urls[0]) + "sitemap.xml")
+            f"{extract_root_from_input(urls[0])}sitemap.xml"
+        )
     config["selectors"]["lvl0"] = OrderedDict((
         ("selector",
          "//div[contains(@class, 'sidebar')]//li/a[text()=//div[contains(@class, 'article')]//h1[1]/text()]"),
@@ -308,7 +304,8 @@ def to_larecipe_config(config, urls=None):
 def to_publii_config(config, urls=None):
     if urls:
         config["sitemap_urls"] = get_sitemap_if_available(
-            extract_root_from_input(urls[0]) + "sitemap.xml")
+            f"{extract_root_from_input(urls[0])}sitemap.xml"
+        )
 
     config["selectors"]["lvl0"] = OrderedDict((
         ("selector", ".active-parent > span"),

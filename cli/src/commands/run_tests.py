@@ -41,7 +41,6 @@ class RunTests(AbstractCommand):
         test_command = ["pytest", "./scraper/src"]
 
         if docker == "no_browser":
-            test_command.append("-k")
-            test_command.append("not _browser")
+            test_command.extend(("-k", "not _browser"))
         print(test_command)
         return self.exec_shell_command(test_command)

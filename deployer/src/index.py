@@ -34,18 +34,19 @@ def deploy_config(config_name, config_exists, push_config=True):
     config_folder += '/configs'
 
     if not path.isdir(config_folder):
-        print("Folder: " + config_folder + " does not exist")
+        print(f"Folder: {config_folder} does not exist")
         exit()
 
     # config_exists = config_name in fetchers.get_configs_from_repos()
 
     if push_config == 'True':
         # Not using the config manager to avoid it stashing the config that we want to push
-        helpers.check_output_decoded(['git', 'add', config_name + '.json'],
-                                    cwd=config_folder)
         helpers.check_output_decoded(
-            ['git', 'commit', '-m', 'update ' + config_name],
-            cwd=config_folder)
+            ['git', 'add', f'{config_name}.json'], cwd=config_folder
+        )
+        helpers.check_output_decoded(
+            ['git', 'commit', '-m', f'update {config_name}'], cwd=config_folder
+        )
 
         helpers.check_output_decoded(['git', 'push', 'origin', 'master'],
                                     cwd=config_folder)
@@ -73,21 +74,21 @@ def deploy_configs(added, changed, removed, force_deploy=False):
         print("")
         print("Will be \033[1;32madded\033[0m :")
         for config in added:
-            added_log += " - " + config + "\n"
+            added_log += f" - {config}" + "\n"
         print(added_log)
 
     if len(removed):
         print("")
         print("Will be \033[1;31mdeleted\033[0m :")
         for config in removed:
-            removed_log += " - " + config + "\n"
+            removed_log += f" - {config}" + "\n"
         print(removed_log)
 
     if len(changed):
         print("")
         print("Will be \033[1;33mupdated\033[0m :")
         for config in changed:
-            log = " - " + config
+            log = f" - {config}"
             cli_log = log
             updated_log += log + "\n"
             print(cli_log)
